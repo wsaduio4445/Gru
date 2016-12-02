@@ -25,20 +25,28 @@ background_array = [background_image_filename, background_image_loop]
 x_axis, y_axis = 0, 0
 #Position of looping
 
+start_button = pygame.image.load("Images/Menu/Main menu/start_button.png")
+start_button_selected = pygame.image.load("Images/Menu/Main menu/start_button_selected.png")
+option_button = pygame.image.load("Images/Menu/Main menu/option_button.png")
+option_button_selected = pygame.image.load("Images/Menu/Main menu/option_button_selected.png")
+quit_button = pygame.image.load("Images/Menu/Main menu/quit_button.png")
+quit_button_selected = pygame.image.load("Images/Menu/Main menu/quit_button_selected.png")
+#Load buttons' images
+
+start_selected = True
+option_selected = False
+quit_selected = False
+#Define buttons' values
+
+
+
 process = True
 #Define the loop
 
 while process:
 #Keep looping through
-    for event in pygame.event.get():
-    #Loop through the events    
-        if event.type == pygame.QUIT:
-        #Check if user clicks close-button    
-            pygame.quit()
-            exit()
-            #If it's true, quit the game
 
-    x_axis -= 0.1
+    x_axis -= 0.2
     #Define the speed of looping background
     if x_axis <= -800:
     #If the background is completely out of the window
@@ -50,5 +58,60 @@ while process:
         #Define where to start looping
     screen.blit(background, (x_axis, y_axis))
     #Start looping
+    
+    for event in pygame.event.get():
+    #Loop through the events
+        if event.type == pygame.QUIT:
+        #Check if user clicks close-button
+            process = False
+            pygame.quit()
+            exit()
+            #If it's true, quit the game
+
+        if event.type == pygame.KEYDOWN:
+            if start_selected == True and option_selected == False and quit_selected == False:
+                if event.key == pygame.K_UP:
+                    start_selected = False
+                    option_selected = False
+                    quit_selected = True
+                elif event.key == pygame.K_DOWN:
+                    start_selected = False
+                    option_selected = True
+                    quit_selected = False
+            elif start_selected == False and option_selected == True and quit_selected == False:
+                if event.key == pygame.K_UP:
+                    start_selected = True
+                    option_selected = False
+                    quit_selected = False
+                elif event.key == pygame.K_DOWN:
+                    start_selected = False
+                    option_selected = False
+                    quit_selected = True
+            elif start_selected == False and option_selected == False and quit_selected == True:
+                if event.key == pygame.K_UP:
+                    start_selected = False
+                    option_selected = True
+                    quit_selected = False
+                elif event.key == pygame.K_DOWN:
+                    start_selected = True
+                    option_selected = False
+                    quit_selected = False
+
+    if start_selected == True and option_selected == False and quit_selected == False:
+        screen.blit(start_button_selected, (592, 272))
+        screen.blit(option_button, (592, 328))
+        screen.blit(quit_button, (592, 384))
+        pygame.display.update()
+    elif start_selected == False and option_selected == True and quit_selected == False:
+        screen.blit(start_button, (592, 272))
+        screen.blit(option_button_selected, (592, 328))
+        screen.blit(quit_button, (592, 384))
+        pygame.display.update()
+    elif start_selected == False and option_selected == False and quit_selected == True:
+        screen.blit(start_button, (592, 272))
+        screen.blit(option_button, (592, 328))
+        screen.blit(quit_button_selected, (592, 384))
+        pygame.display.update()
+    
     pygame.display.update()
     #Update screen
