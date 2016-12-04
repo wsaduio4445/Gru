@@ -3,3 +3,4 @@
 2016 des 1  menu-jiexiong
 2016 des 2  character, enemy, shoot, part of collide - jiexiong
 2016 des 3  voice, score, gameover loop, try to fix something weird - lejing
+2016 des 4  set voice option - lejing
