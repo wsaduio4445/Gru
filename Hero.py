@@ -8,7 +8,8 @@ from pygame.locals import *
 #Import common functions and values
 from sys import exit
 #Import function "exit" from sys
-# 搜索gameonver 就是游戏结束有关的东西，搜索score就是积分，voice就是游戏音乐和音效
+
+
 class Asteroid_Large(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -138,7 +139,12 @@ start_selected = True
 option_selected = False
 quit_selected = False
 back_selected = False
-voice=0.25
+voice_triggle = True
+voice_on=False
+if voice_on==True:
+    voice=0.25
+else:
+    voice=0
 #Define buttons' values
 score=0
 my_font = pygame.font.SysFont("", 30)
@@ -154,8 +160,8 @@ pygame.mixer.init()
 #Define the mixer
 
 pygame.mixer.music.play(-1, 0.0)
-pygame.mixer.music.set_volume(voice)
-shoot.set_volume(voice)
+pygame.mixer.music.set_volume(0.25)
+shoot.set_volume(0.25)
 
 
 clock = pygame.time.Clock()
@@ -270,9 +276,10 @@ while process:
             #Define where to start looping
         screen.blit(background, (x_axis, y_axis))
 
-        voice_triggle = True
+        
         #Start looping
         for event in pygame.event.get():
+
         #Loop through the events
             if event.type == pygame.QUIT:
             #if user clicks close button
@@ -297,7 +304,16 @@ while process:
                 
                 elif event.key == pygame.K_UP or event.key == pygame.K_DOWN:
                     back_selected = True
-                    
+                elif event.key == pygame.K_LEFT:
+                    voice_triggle = False
+                elif event.key == pygame.K_RIGHT:
+                    voice_triggle = True
+        if voice_triggle == True: 
+            screen.blit(voice_button_on,(340,240))
+            pygame.mixer.music.set_volume(0.25)
+        else:
+            screen.blit(voice_button_off,(340,240))
+            pygame.mixer.music.set_volume(0)
         if back_selected == True:
             screen.blit(back_button_selected, (592, 384))
         else:
@@ -522,4 +538,3 @@ pygame.quit()
 #                    if asteroid.rect.y-player.rect.y < 5 or asteroid.rect.y-player.rect.y < -5:
 #                        game=False
 #                        menu=True
-   
