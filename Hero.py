@@ -311,9 +311,13 @@ while process:
         if voice_triggle == True: 
             screen.blit(voice_button_on,(340,240))
             pygame.mixer.music.set_volume(0.25)
+            shoot.set_volume(0.25)
+
         else:
             screen.blit(voice_button_off,(340,240))
             pygame.mixer.music.set_volume(0)
+            shoot.set_volume(0)
+
         if back_selected == True:
             screen.blit(back_button_selected, (592, 384))
         else:
