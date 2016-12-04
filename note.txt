@@ -1,4 +1,5 @@
-2016 nov 28-30 begin- lejing&jiexiong
+2016 nov 28-30 learing python- lejing&jiexiong
 2016 des 1  background of menu-jiexiong
 2016 des 1  menu-jiexiong
-2016 des 2  made charactor can Steering
+2016 des 2  character, enemy, shoot, part of collide - jiexiong
+2016 des 3  voice, score, gameover loop, try to fix something weird - lejing
