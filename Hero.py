@@ -523,3 +523,4 @@ pygame.quit()
 #                    if asteroid.rect.y-player.rect.y < 5 or asteroid.rect.y-player.rect.y < -5:
 #                        game=False
 #                        menu=True
+   
