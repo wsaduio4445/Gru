@@ -8,8 +8,7 @@ from pygame.locals import *
 #Import common functions and values
 from sys import exit
 #Import function "exit" from sys
-
-
+# 搜索gameonver 就是游戏结束有关的东西，搜索score就是积分，voice就是游戏音乐和音效
 class Asteroid_Large(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
