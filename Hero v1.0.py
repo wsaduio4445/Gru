@@ -1,5 +1,6 @@
-#Hero alpha version 4.0
-#05.12.2016
+#Hero version 1.0
+#06.12.2016
+#Jiexiong Huang
 
 import pygame
 #Import Pygame
@@ -68,7 +69,7 @@ white = (255, 255, 255)
 
 screen = pygame.display.set_mode([screen_width, screen_height])
 #Create a 800*480 window
-pygame.display.set_caption("Hero alpha v3.0")
+pygame.display.set_caption("Hero v1.0")
 #Set up the title of the window
 
 keys = [False, False, False, False]
@@ -108,11 +109,11 @@ background_game_over_loop = pygame.image.load(background_game_over_image_loop).c
 background_game_over_array = [background_game_over_image_filename, background_image_loop]
 x_axis_background_game_over, y_axis_background_game_over = 0, 0
 
-press_enter = pygame.mixer.Sound("Audio/press_enter.wav")
+key_press = pygame.mixer.Sound("Audio/key_press.wav")
 explode = pygame.mixer.Sound("Audio/explode.wav")
 shoot = pygame.mixer.Sound("Audio/shoot.wav")
 
-press_enter.set_volume(0.05)
+key_press.set_volume(0.05)
 explode.set_volume(0.1)
 shoot.set_volume(0.05)
 
@@ -133,6 +134,15 @@ quit_button = pygame.image.load("Image/Menu/Main menu/quit_button.png")
 quit_button_selected = pygame.image.load("Image/Menu/Main menu/quit_button_selected.png")
 back_button = pygame.image.load("Image/Menu/Option/back_button.png")
 back_button_selected = pygame.image.load("Image/Menu/Option/back_button_selected.png")
+space_warp_button = pygame.image.load("Image/Menu/Option/space_warp_button.png")
+space_warp_button_selected = pygame.image.load("Image/Menu/Option/space_warp_button_selected.png")
+space_warp_button_actived = pygame.image.load("Image/Menu/Option/space_warp_button_actived.png")
+space_warp_button_actived_selected = pygame.image.load("Image/Menu/Option/space_warp_button_actived_selected.png")
+mute_button = pygame.image.load("Image/Menu/Option/mute_button.png")
+mute_button_selected = pygame.image.load("Image/Menu/Option/mute_button_selected.png")
+mute_button_actived = pygame.image.load("Image/Menu/Option/mute_button_actived.png")
+mute_button_actived_selected = pygame.image.load("Image/Menu/Option/mute_button_actived_selected.png")
+
 #Load buttons' images
 
 asteroid_large_image = pygame.image.load("Image/Enemy/object_large.png")
@@ -168,10 +178,15 @@ all_sprites_list.add(player)
 new_game_selected = True
 continue_selected = False
 continue_disable = True
-restart_selected = True
+restart_selected = False
+over_back_selected = True
 option_selected = False
 quit_selected = False
-back_selected = False
+back_selected = True
+space_warp_selected = False
+space_warp_actived_selected = False
+mute_selected = False
+mute_actived_selected = False
 #Define buttons' values
 
 process = True
@@ -182,14 +197,20 @@ game_over = False
 option = False
 draw = True
 alive = True
+space_warp = False
+mute = False
 #Define the loop
 
 score = 0
+shield_disable = True
 shield_active = False
 
 draw_large = True
 draw_medium = True
 draw_small =True
+
+shield_hit_point = 0
+hit_count = 0
 
 additional_speed = 0
 
@@ -224,7 +245,7 @@ while process:
 
             if event.type == pygame.KEYDOWN:
             #Check if user presses any key
-                press_enter.play()
+                key_press.play()
                 if game_continue == False:
                     if new_game_selected == True and option_selected == False and quit_selected == False:
                     #When start button is selected
@@ -232,9 +253,11 @@ while process:
                             game = True
                             alive =True
                             score = 0
-                            number_large = 20
-                            number_medium = 30
-                            number_small = 40
+                            shield_disable = True
+                            shield_hit_point = 0
+                            number_large = 21
+                            number_medium = 32
+                            number_small = 46
                             
                             menu = False
                         elif event.key == pygame.K_UP:
@@ -285,6 +308,7 @@ while process:
                             game = True
                             alive =True
                             score = 0
+                            hit_count = 0
                             player_image = player_up
                             player = Player()
                             asteroid_large_list.empty()
@@ -298,9 +322,9 @@ while process:
                             all_sprites_list.add(player)
                             x_axis, y_axis = 0, 0
                             all_sprites_list.empty()
-                            number_large = 20
-                            number_medium = 30
-                            number_small = 40
+                            number_large = 21
+                            number_medium = 32
+                            number_small = 46
                             
                             menu = False
                         elif event.key == pygame.K_UP:
@@ -422,15 +446,15 @@ while process:
 
     while option:
         screen.fill(white)
-        x_axis -= 0.05
+        x_axis_background -= 0.05
         #Define the speed of looping background
-        if x_axis <= -800:
+        if x_axis_background <= -800:
         #If the background is completely out of the window
             background_array = background_array[1:] + background_array[:1]
             #Loop the array
-            x_axis = 800
+            x_axis_background = 800
             #Define where to start looping
-        screen.blit(background, (x_axis, y_axis))
+        screen.blit(background, (x_axis_background, y_axis_background))
         #Start looping
         
         for event in pygame.event.get():
@@ -440,31 +464,287 @@ while process:
                 option = False
                 process = False
                 #End of loop
-            
+
             if event.type == pygame.KEYDOWN:
             #Check if user presses any key
-                press_enter.play()
+                key_press.play()
                 if event.key == pygame.K_RETURN:
                 #When user presses enter key
                     if back_selected == True:
-                        back_selected = False
+                        #back_selected = False
                         menu = True
                         option = False
-                elif event.key == pygame.K_ESCAPE:
+                    if space_warp_selected == True or space_warp_actived_selected == True:
+                        if space_warp == False:
+                            space_warp = True
+                            space_warp_actived_selected = True
+                            space_warp_selected = False
+                        else:
+                            space_warp = False
+                            space_warp_actived_selected = False
+                            space_warp_selected = True
+                    if mute_selected == True or mute_actived_selected == True:
+                        if mute == False:
+                            mute = True
+                            key_press.set_volume(0)
+                            explode.set_volume(0)
+                            shoot.set_volume(0)
+                            pygame.mixer.music.stop()
+                            mute_actived_selected = True
+                            mute_selected = False
+                        else:
+                            mute = False
+                            key_press.set_volume(0.05)
+                            explode.set_volume(0.1)
+                            shoot.set_volume(0.05)
+                            pygame.mixer.music.play()
+                            mute_actived_selected = False
+                            mute_selected = True
+
+                if event.key == pygame.K_UP:
+                    if space_warp == False and mute == False:
+                        if back_selected == True:
+                            mute_selected = True
+                            back_selected = False
+                            
+                        elif space_warp_selected == True:
+                            space_warp_selected = False
+                            back_selected = True
+
+                        elif mute_selected == True:
+                            space_warp_selected = True
+                            mute_selected = False
+
+                    if space_warp == True and mute == False:
+                        if back_selected == True:
+                            mute_selected = True
+                            back_selected = False
+                            
+                        elif space_warp_actived_selected == True:
+                            space_warp_actived_selected = False
+                            back_selected = True
+
+                        elif mute_selected == True:
+                            space_warp_actived_selected = True
+                            mute_selected = False
+
+                    if space_warp == False and mute == True:
+                        if back_selected == True:
+                            mute_actived_selected = True
+                            back_selected = False
+                            
+                        elif space_warp_selected == True:
+                            space_warp_selected = False
+                            back_selected = True
+
+                        elif mute_actived_selected == True:
+                            space_warp_selected = True
+                            mute_actived_selected = False
+
+                    if space_warp == True and mute == True:
+                        if back_selected == True:
+                            mute_actived_selected = True
+                            back_selected = False
+                            
+                        elif space_warp_actived_selected == True:
+                            space_warp_actived_selected = False
+                            back_selected = True
+
+                        elif mute_actived_selected == True:
+                            space_warp_actived_selected = True
+                            mute_actived_selected = False
+
+                if event.key == pygame.K_DOWN:
+                    if space_warp == False and mute == False:
+                        if back_selected == True:
+                            space_warp_selected = True
+                            back_selected = False
+                            
+                        elif space_warp_selected == True:
+                            space_warp_selected = False
+                            mute_selected = True
+
+                        elif mute_selected == True:
+                            back_selected = True
+                            mute_selected = False
+
+                    if space_warp == True and mute == False:
+                        if back_selected == True:
+                            space_warp_actived_selected = True
+                            back_selected = False
+                            
+                        elif space_warp_actived_selected == True:
+                            space_warp_actived_selected = False
+                            mute_selected = True
+
+                        elif mute_selected == True:
+                            back_selected = True
+                            mute_selected = False
+
+                    if space_warp == False and mute == True:
+                        if back_selected == True:
+                            space_warp_selected = True
+                            back_selected = False
+                            
+                        elif space_warp_selected == True:
+                            space_warp_selected = False
+                            mute_actived_selected = True
+
+                        elif mute_actived_selected == True:
+                            back_selected = True
+                            mute_actived_selected = False
+
+                    if space_warp == True and mute == True:
+                        if back_selected == True:
+                            space_warp_actived_selected = True
+                            back_selected = False
+                            
+                        elif space_warp_actived_selected == True:
+                            space_warp_actived_selected = False
+                            mute_actived_selected = True
+
+                        elif mute_actived_selected == True:
+                            back_selected = True
+                            mute_actived_selected = False
+                    
+                    
+                if event.key == pygame.K_ESCAPE:
                 #When user presses escape key
                     back_selected = False
                     menu = True
                     option = False
                 
-                elif event.key == pygame.K_UP or event.key == pygame.K_DOWN:
-                    back_selected = True
+        if mute == False and space_warp == False:
+            if back_selected == True and space_warp_selected == False  and mute_selected == False :
+                screen.blit(back_button_selected, (592, 384))
+                screen.blit(space_warp_button, (400, 216))
+                screen.blit(mute_button, (400, 272))
 
-        if back_selected == True:
-            screen.blit(back_button_selected, (592, 384))
-        else:
-            screen.blit(back_button, (592, 384))
+            elif back_selected == False and space_warp_selected == True  and mute_selected == False:
+                screen.blit(back_button, (592, 384))
+                screen.blit(space_warp_button_selected, (400, 216))
+                screen.blit(mute_button, (400, 272))
+
+            elif back_selected == False and space_warp_selected == False  and mute_selected == True:
+                screen.blit(back_button, (592, 384))
+                screen.blit(space_warp_button, (400, 216))
+                screen.blit(mute_button_selected, (400, 272))
+
+        if mute == True and space_warp == False:
+            if back_selected == True and space_warp_selected == False and  mute_actived_selected == False:
+                screen.blit(back_button_selected, (592, 384))
+                screen.blit(space_warp_button, (400, 216))
+                screen.blit(mute_button_actived, (400, 272))
+
+            elif back_selected == False and space_warp_selected == True and  mute_actived_selected == False:
+                screen.blit(back_button, (592, 384))
+                screen.blit(space_warp_button_selected, (400, 216))
+                screen.blit(mute_button_actived, (400, 272))
+
+            elif back_selected == False and space_warp_selected == False and mute_actived_selected == True:
+                screen.blit(back_button, (592, 384))
+                screen.blit(space_warp_button, (400, 216))
+                screen.blit(mute_button_actived_selected, (400, 272))
+
+        if mute == False and space_warp == True:
+            if back_selected == True and space_warp_actived_selected == False  and mute_selected == False:
+                screen.blit(back_button_selected, (592, 384))
+                screen.blit(space_warp_button_actived, (400, 216))
+                screen.blit(mute_button, (400, 272))
+
+            elif back_selected == False and space_warp_actived_selected == True  and mute_selected == False:
+                screen.blit(back_button, (592, 384))
+                screen.blit(space_warp_button_actived_selected, (400, 216))
+                screen.blit(mute_button, (400, 272))
+
+            elif back_selected == False and space_warp_actived_selected == False  and mute_selected == True:
+                screen.blit(back_button, (592, 384))
+                screen.blit(space_warp_button_actived, (400, 216))
+                screen.blit(mute_button_selected, (400, 272))
+
+        if mute == True and space_warp == True:
+            if back_selected == True and space_warp_actived_selected == False  and mute_actived_selected == False:
+                screen.blit(back_button_selected, (592, 384))
+                screen.blit(space_warp_button_actived, (400, 216))
+                screen.blit(mute_button_actived, (400, 272))
+
+            elif back_selected == False and space_warp_actived_selected == True  and mute_actived_selected == False:
+                screen.blit(back_button, (592, 384))
+                screen.blit(space_warp_button_actived_selected, (400, 216))
+                screen.blit(mute_button_actived, (400, 272))
+
+            elif back_selected == False and space_warp_actived_selected == False  and mute_actived_selected == True:
+                screen.blit(back_button, (592, 384))
+                screen.blit(space_warp_button_actived, (400, 216))
+                screen.blit(mute_button_actived_selected, (400, 272))
+
+        
         
         pygame.display.update()
+
+    while game_over:
+        
+        screen.fill(white)
+        screen.blit(background_game_over, [0, 0])
+        
+        for event in pygame.event.get():
+        #Loop through the events
+            if event.type == pygame.QUIT:
+            #if user clicks close button
+                game_over = False
+                process = False
+                #End of loop
+
+            if event.type == pygame.KEYDOWN:
+                key_press.play()
+                if event.key == pygame.K_ESCAPE:
+                    game_over = False
+                    menu = True
+
+                if event.key == pygame.K_RETURN:
+                #    if restart_selected:
+                #        game_continue = False
+                #        game = True
+                #        alive =True
+                #        score = 0
+                #        shield_disable = True
+                #        shield_hit_point = 0
+                #        number_large = 21
+                #        number_medium = 32
+                #        number_small = 46
+                #        game_over = False
+
+                    if over_back_selected:
+                        game_continue = False
+                        game_over = False
+                        menu = True
+
+                #if event.key == pygame.K_UP:
+                #    if restart_selected:
+                #        restart_selected = False
+                #        over_back_selected = True
+                #    if over_back_selected:
+                #        restart_selected = True
+                #        over_back_selected = False
+
+                #if event.key == pygame.K_DOWN:
+                #    if restart_selected:
+                #        restart_selected = False
+                #        over_back_selected = True
+                #    if over_back_selected:
+                #        restart_selected = True
+                #        over_back_selected = False
+          
+
+        #if restart_selected:
+        #    screen.blit(restart_button_selected, (592, 328))
+        #    screen.blit(back_button, (592, 384))
+        #if over_back_selected:
+        #    screen.blit(restart_button, (592, 328))
+        #    screen.blit(back_button_selected, (592, 384))
+
+        pygame.display.update()
+        
 
     while game:
         screen.fill(white)
@@ -479,8 +759,9 @@ while process:
         screen.blit(score_header, [650, 10])
         screen.blit(score_text, score_rect)
         
-        explode.set_volume(0.1)
-        pygame.mixer.music.set_volume(0.05)
+        if not mute:
+            explode.set_volume(0.1)
+            pygame.mixer.music.set_volume(0.05)
 
         all_sprites_list.add(player)
         
@@ -506,42 +787,59 @@ while process:
                         menu = True
                         game = False
 
-                if event.key == pygame.K_SPACE or event.key == pygame.K_z:
-                    shoot.play()
-                    if directions[0]:
-                        shot = Missile_vertical()
-                        shot.rect.x = player.rect.x + 19
-                        shot.rect.y = player.rect.y + 27
-                        missile_up_list.add(shot)
-                        missile_list.add(shot)
-                        all_sprites_list.add(shot)
-                        
-                    elif directions[1]:
-                        shot = Missile_vertical()
-                        shot.rect.x = player.rect.x + 19
-                        shot.rect.y = player.rect.y + 33
-                        missile_down_list.add(shot)
-                        missile_list.add(shot)
-                        all_sprites_list.add(shot)
+                if not shield_active:
+                    if event.key == pygame.K_SPACE or event.key == pygame.K_z:
+                        shoot.play()
+                        if directions[0]:
+                            shot = Missile_vertical()
+                            shot.rect.x = player.rect.x + 19
+                            shot.rect.y = player.rect.y + 27
+                            missile_up_list.add(shot)
+                            missile_list.add(shot)
+                            all_sprites_list.add(shot)
+                            
+                        elif directions[1]:
+                            shot = Missile_vertical()
+                            shot.rect.x = player.rect.x + 19
+                            shot.rect.y = player.rect.y + 33
+                            missile_down_list.add(shot)
+                            missile_list.add(shot)
+                            all_sprites_list.add(shot)
 
-                    elif directions[2]:
-                        shot = Missile_horizontal()
-                        shot.rect.x = player.rect.x + 21
-                        shot.rect.y = player.rect.y + 19
-                        missile_left_list.add(shot)
-                        missile_list.add(shot)
-                        all_sprites_list.add(shot)
+                        elif directions[2]:
+                            shot = Missile_horizontal()
+                            shot.rect.x = player.rect.x + 21
+                            shot.rect.y = player.rect.y + 19
+                            missile_left_list.add(shot)
+                            missile_list.add(shot)
+                            all_sprites_list.add(shot)
 
-                    elif directions[3]:
-                        shot = Missile_horizontal()
-                        shot.rect.x = player.rect.x + 33
-                        shot.rect.y = player.rect.y + 19
-                        missile_right_list.add(shot)
-                        missile_list.add(shot)
-                        all_sprites_list.add(shot)
+                        elif directions[3]:
+                            shot = Missile_horizontal()
+                            shot.rect.x = player.rect.x + 33
+                            shot.rect.y = player.rect.y + 19
+                            missile_right_list.add(shot)
+                            missile_list.add(shot)
+                            all_sprites_list.add(shot)
 
-                if event.key == pygame.K_x:
-                    shield_active = True
+
+                if shield_hit_point > 0:
+                    shield_disable = False
+                    
+                if shield_hit_point < 1:
+                    shield_disable = True
+                    shield_active = False
+                    all_sprites_list.remove(shield)
+                    pygame.sprite.groupcollide(shield_list, all_sprites_list, True, True)
+                    pygame.sprite.spritecollide(shield, shield_list, True)
+
+                if hit_count >= 10:
+                    shield_hit_point += 5
+                    hit_count = 0
+
+                if not shield_disable:
+                    if event.key == pygame.K_x:
+                        shield_active = True
                     
                     
                 if event.key == pygame.K_w or event.key == pygame.K_UP:
@@ -559,9 +857,12 @@ while process:
 
             elif event.type == pygame.KEYUP:
             #When user releases any key
-                if event.key == pygame.K_x:
-                    shield_active = False
-                    all_sprites_list.remove(shield)
+                if shield_disable == False:
+                    if event.key == pygame.K_x:
+                        shield_active = False
+                        all_sprites_list.remove(shield)
+                        pygame.sprite.groupcollide(shield_list, all_sprites_list, True, True)
+                        pygame.sprite.spritecollide(shield, shield_list, True)
                 
                 if event.key == pygame.K_w or event.key == pygame.K_UP:
                     keys[0] = False
@@ -609,9 +910,13 @@ while process:
                 all_sprites_list.add(player)
                 directions = [False, True, False, False]
             elif keys[2]:
-                if player.rect.x < -30:
-                    player.rect.x = 770
-                player.rect.x -= 4
+                if space_warp:
+                    if player.rect.x < -30:
+                        player.rect.x = 770
+                    player.rect.x -= 4
+                if not space_warp:
+                    if player.rect.x > 20:
+                        player.rect.x -= 4
                 player_image = player_left
                 x_axis = player.rect.x
                 y_axis = player.rect.y
@@ -627,9 +932,13 @@ while process:
                 all_sprites_list.add(player)
                 directions = [False, False, True, False]
             elif keys[3]:
-                if player.rect.x > 770:
-                    player.rect.x = -30
-                player.rect.x += 4
+                if space_warp:
+                    if player.rect.x > 770:
+                        player.rect.x = -30
+                    player.rect.x += 4
+                if not space_warp:
+                    if player.rect.x < 720:
+                        player.rect.x += 4
                 player_image = player_right
                 x_axis = player.rect.x
                 y_axis = player.rect.y
@@ -682,16 +991,16 @@ while process:
         if draw_large:
             asteroid = Asteroid_Large()
             asteroid.rect.x = random.randrange(screen_width - 100)
-            asteroid.rect.y = -random.randrange(100, 10000)
+            asteroid.rect.y = -random.randrange(100, 4000)
             asteroid_large_list.add(asteroid)
             asteroid_list.add(asteroid)
             all_sprites_list.add(asteroid)
             number_large -= 1
 
-        if draw_large:
+        if draw_medium:
             asteroid = Asteroid_Medium()
             asteroid.rect.x = random.randrange(screen_width - 60)
-            asteroid.rect.y = -random.randrange(100, 10000)
+            asteroid.rect.y = -random.randrange(100, 60000)
             asteroid_medium_list.add(asteroid)
             asteroid_list.add(asteroid)
             all_sprites_list.add(asteroid)
@@ -714,7 +1023,7 @@ while process:
         if number_medium <= 0:
             draw_medium = False
         elif number_medium >= 0:
-            draw_mediun = True
+            draw_medium = True
 
         if number_small <= 0:
             draw_small = False
@@ -725,26 +1034,40 @@ while process:
 
         if pygame.sprite.groupcollide(missile_list, asteroid_large_list, True, True):
             explode.play()
+            hit_count += 1
             score += 60
 
         if pygame.sprite.groupcollide(missile_list, asteroid_medium_list, True, True):
             explode.play()
+            hit_count += 1
             score += 40
 
         if pygame.sprite.groupcollide(missile_list, asteroid_small_list, True, True):
             explode.play()
+            hit_count += 1
             score += 10
             
         if shield_active:
             if pygame.sprite.spritecollide(shield, asteroid_list, True):
-                explode.set_volume(0.1)
-                explode.play()
+                if pygame.sprite.spritecollide(shield, asteroid_large_list, True):
+                    number_large += 1
+                if pygame.sprite.spritecollide(shield, asteroid_medium_list, True):
+                    number_medium += 1
+                if pygame.sprite.spritecollide(shield, asteroid_small_list, True):
+                    number_small += 1
+                shield_hit_point -= 1
+                if not mute:
+                    explode.set_volume(0.1)
+                    explode.play()
         else:
             if pygame.sprite.spritecollide(player, asteroid_list, True):
-                explode.set_volume(0.4)
-                explode.play()
+                if not mute:
+                    explode.set_volume(0.4)
+                    explode.play()
                 keys = [False, False, False, False]
                 alive = False
+                shield_disable = True
+                shield_hit_point = 0
                 x_axis, y_axis = 0, 0
                 player_image = player_up
                 player = Player()
@@ -825,6 +1148,29 @@ while process:
                 number_small += 1
                 if additional_speed < 4:
                     additional_speed += 0.1
+
+        if score >= 3000:
+        #Stage clear, game over
+            keys = [False, False, False, False]
+            alive = False
+            shield_disable = True
+            shield_hit_point = 0
+            x_axis, y_axis = 0, 0
+            player_image = player_up
+            player = Player()
+            asteroid_large_list.empty()
+            asteroid_medium_list.empty()
+            asteroid_small_list.empty()
+            asteroid_list.empty()
+            player_list.empty()
+            all_sprites_list.empty()
+            player = Player()
+            player.rect.x = 370
+            player.rect.y = 400
+                
+            additional_speed = 0
+            game_over = True
+            game = False
         
         all_sprites_list.draw(screen)
 
@@ -834,65 +1180,7 @@ while process:
 
     pygame.mixer.music.set_volume(0.2)
 
-    while game_over:
-        screen.fill(white)
-        #background_game_over_array = background_game_over_array[1:] + background_game_over_array[:1]
-        #screen.blit(background_game_over, (x_axis_background_game_over, y_axis_background_game_over))
-        screen.blit(background_game_over, [0, 0])
-        
-        for event in pygame.event.get():
-        #Loop through the events
-            screen.blit(background_game_over, [0, 0])
-            if event.type == pygame.QUIT:
-            #if user clicks close button
-                process = False
-                game_over = False
-                #End of loop
-
-            if event.type == pygame.KEYDOWN:
-            #Check if user presses any key
-                press_enter.play()
-                if restart_selected == True and back_selected == False:
-
-                    if event.key == pygame.K_RETURN:
-                        game = True
-                        alive = True
-                        
-                        number_large = 20
-                        number_medium = 30
-                        number_small = 40
-
-                        game_over = False
-                        
-                    elif event.key == pygame.K_UP:
-                        restart_selected = False
-                        back_selected = True
-                    elif event.key == pygame.K_DOWN:
-                        restart_selected = False
-                        back_selected = True
-
-                if restart_selected == False and back_selected == True:
-                    if event.key == pygame.K_RETURN:
-                        menu = True
-                        alive = True
-
-                        game_over = False
-                        
-                    if event.key == pygame.K_UP:
-                        restart_selected = True
-                        back_selected = False
-                    elif event.key == pygame.K_DOWN:
-                        restart_selected = True
-                        back_selected = False
-        
-        if restart_selected == True and back_selected == False:
-            screen.blit(restart_button_selected, (592, 328))
-            screen.blit(back_button, (592, 384))
-        if restart_selected == False and back_selected == True:
-            screen.blit(restart_button, (592, 328))
-            screen.blit(back_button_selected, (592, 384))
-
-        pygame.display.update()
+    pygame.display.update()
 
 pygame.quit()
 #Quit the game
